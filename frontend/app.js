@@ -9,7 +9,7 @@
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
-const API_BASE = window.RENTABYTE_API_BASE || "http://localhost:8000";
+const API_BASE = (window.RENTABYTE_API_BASE || "").replace(/\/$/, "");
 
 // Replace with your deployed contract address after running `npx hardhat run`
 const CONTRACT_ADDRESS = window.RENTABYTE_CONTRACT || "";
@@ -69,13 +69,12 @@ function polRequired(mb) {
 
 function showToast(msg, type = "info") {
   // Simple alert fallback – replace with a toast library for polish
-  const icons = { success: "✅", error: "❌", info: "ℹ️", warn: "⚠️" };
   console.log(`[${type.toUpperCase()}] ${msg}`);
   // Create a temporary DOM toast
   const el = document.createElement("div");
   el.className = `alert alert-${type}`;
   el.style.cssText = "position:fixed;top:1rem;right:1rem;z-index:9999;max-width:380px;animation:fadeIn .3s";
-  el.innerHTML = `${icons[type] || ""} ${msg}`;
+  el.textContent = msg;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 4500);
 }
@@ -164,7 +163,7 @@ function updateWalletUI() {
       btn.innerHTML = `<span class="wallet-dot"></span> ${shortAddr(State.walletAddress)}`;
       btn.className = "wallet-chip";
     } else {
-      btn.innerHTML = "🦊 Connect MetaMask";
+      btn.textContent = "Connect MetaMask";
       btn.className = "btn btn-primary";
     }
   }
@@ -269,7 +268,13 @@ async function registerStorage(storageMB) {
     wallet_address: State.walletAddress,
     storage_mb: parseInt(storageMB, 10),
   });
-  showToast(`Registered ${data.registered_mb} MB (node #${data.node_id})`, "success");
+  showToast(
+    `Registered ${data.registered_mb} MB (node #${data.node_id}). Reward sent: ${data.reward_pol} POL`,
+    "success"
+  );
+  if (data.reward_tx_hash) {
+    console.log("Seller reward tx:", data.reward_tx_hash);
+  }
   await loadStoragePool();
   return data;
 }

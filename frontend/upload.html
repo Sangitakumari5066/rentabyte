@@ -6,88 +6,17 @@
   <title>My Files – RentAByte</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
-  <style>
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
-
-    .file-row {
-      display: grid;
-      grid-template-columns: 1fr auto auto auto;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.85rem 1rem;
-      border-bottom: 1px solid var(--border);
-      transition: background var(--transition);
-    }
-    .file-row:last-child { border-bottom: none; }
-    .file-row:hover      { background: var(--bg-card-hover); }
-
-    .file-icon {
-      font-size: 1.4rem;
-      margin-right: 0.5rem;
-    }
-
-    .file-name  { font-weight: 600; font-size: 0.9rem; word-break: break-all; }
-    .file-meta  { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem; }
-
-    .empty-state {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: var(--text-muted);
-    }
-    .empty-state svg { margin-bottom: 1rem; opacity: 0.3; }
-
-    .upload-progress {
-      background: var(--bg-base);
-      border-radius: var(--radius-sm);
-      height: 4px;
-      overflow: hidden;
-      margin-top: 0.5rem;
-    }
-    .upload-progress-bar {
-      height: 100%;
-      background: var(--gradient-hero);
-      border-radius: 999px;
-      transition: width 0.3s;
-      width: 0%;
-    }
-
-    #drop-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(124,58,237,0.15);
-      border: 3px dashed var(--accent-purple);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      color: #a78bfa;
-      font-weight: 700;
-    }
-    body.dragging #drop-overlay { display: flex; }
-  </style>
 </head>
 <body>
 
 <!-- ── Drag overlay ───────────────────────────────────────────────────────── -->
-<div id="drop-overlay">Drop files here to upload ✨</div>
+<div id="drop-overlay">Drop files here to upload</div>
 
 <!-- ── Navbar ─────────────────────────────────────────────────────────────── -->
 <nav>
   <div class="container nav-inner">
     <a href="index.html" class="nav-logo">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2L2 7l10 5 10-5-10-5z" fill="url(#g1)"/>
-        <path d="M2 17l10 5 10-5" stroke="url(#g1)" stroke-width="2" fill="none"/>
-        <path d="M2 12l10 5 10-5" stroke="url(#g1)" stroke-width="2" fill="none"/>
-        <defs>
-          <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#7c3aed"/>
-            <stop offset="100%" stop-color="#06b6d4"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      RentAByte
+      <img src="logo.png" alt="RentAByte" />
     </a>
     <div class="nav-links">
       <a href="index.html">Dashboard</a>
@@ -95,43 +24,43 @@
       <a href="https://faucet.polygon.technology" target="_blank">Get Test POL</a>
     </div>
     <button id="btn-connect-wallet" class="btn btn-primary" onclick="handleConnectWallet()">
-      🦊 Connect MetaMask
+      Connect MetaMask
     </button>
   </div>
 </nav>
 
 <div class="container">
-  <section style="padding-top:2rem">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem">
+  <section>
+    <div>
       <div>
-        <h2 style="margin-bottom:0.2rem">My Files</h2>
-        <p style="margin:0;font-size:0.88rem">
-          Wallet: <span class="wallet-chip" id="wallet-display" style="font-size:0.8rem">Not connected</span>
+        <h2>My Files</h2>
+        <p>
+          Wallet: <span class="wallet-chip" id="wallet-display">Not connected</span>
         </p>
       </div>
       <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
-        ⬆️ Upload File
+        Upload File
       </button>
-      <input type="file" id="file-input" style="display:none" onchange="handleFileSelect(event)" />
+      <input type="file" id="file-input" onchange="handleFileSelect(event)" />
     </div>
 
     <!-- ── Allocation Warning ─────────────────────────────────────────────── -->
-    <div id="no-alloc-warning" class="alert alert-warn" style="display:none">
-      ⚠️ You have no active storage allocation.
+    <div id="no-alloc-warning" class="alert alert-warn">
+      You have no active storage allocation.
       <a href="index.html">Go to Dashboard</a> → Purchase Storage first.
     </div>
 
     <!-- ── Tx Hash Input ──────────────────────────────────────────────────── -->
-    <div class="card" style="margin-bottom:1.5rem">
+    <div class="card">
       <div class="card-header">
-        <div class="card-icon icon-purple">🔑</div>
+        <div class="card-icon icon-purple">TX</div>
         <div>
           <h3>Active Allocation</h3>
-          <p style="margin:0;font-size:0.82rem">Paste your payment tx hash to link your storage quota</p>
+          <p>Paste your payment tx hash to link your storage quota</p>
         </div>
       </div>
-      <div style="display:flex;gap:0.75rem;align-items:flex-end">
-        <div class="form-group" style="flex:1;margin-bottom:0">
+      <div>
+        <div class="form-group">
           <label>Payment Transaction Hash</label>
           <input type="text" id="input-tx-hash"
                  placeholder="0xabc123… (from MetaMask)"
@@ -139,18 +68,18 @@
         </div>
         <button class="btn btn-outline" onclick="saveAllocation()">Use This Tx</button>
       </div>
-      <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem">
+      <p>
         This is the transaction hash from your storage purchase on the Dashboard.
         MetaMask shows it after confirmation.
       </p>
     </div>
 
-    <div class="grid-2" style="margin-bottom:1.5rem">
+    <div class="grid-2">
 
       <!-- ── Upload Zone ──────────────────────────────────────────────────── -->
       <div class="card" id="upload-card">
         <div class="card-header">
-          <div class="card-icon icon-cyan">⬆️</div>
+          <div class="card-icon icon-cyan">UP</div>
           <div><h3>Upload File</h3></div>
         </div>
 
@@ -165,54 +94,54 @@
             <line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
           <p><strong>Click or drag files here</strong></p>
-          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem">
+          <p>
             Files are encrypted &amp; split into 5 MB chunks before storage
           </p>
         </div>
 
-        <div id="upload-status" style="display:none;margin-top:1rem">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem">
-            <span id="upload-filename" style="font-size:0.85rem;color:var(--text-secondary)"></span>
-            <span id="upload-pct" style="font-size:0.78rem;color:var(--text-muted)">0%</span>
+        <div id="upload-status">
+          <div>
+            <span id="upload-filename"></span>
+            <span id="upload-pct">0%</span>
           </div>
           <div class="upload-progress">
             <div class="upload-progress-bar" id="upload-progress-bar"></div>
           </div>
-          <p id="upload-msg" style="font-size:0.82rem;margin-top:0.5rem;color:var(--text-muted)">Encrypting…</p>
+          <p id="upload-msg">Encrypting…</p>
         </div>
       </div>
 
       <!-- ── Encryption Info ──────────────────────────────────────────────── -->
       <div class="card">
         <div class="card-header">
-          <div class="card-icon icon-green">🔒</div>
+          <div class="card-icon icon-green">SEC</div>
           <div>
             <h3>How Your Files Are Protected</h3>
           </div>
         </div>
-        <ol class="step-list" style="counter-reset:steps">
-          <li style="border-bottom:1px solid var(--border);padding:0.7rem 0">
+        <ol class="step-list">
+          <li>
             <div>
               <strong>AES Encryption (Fernet)</strong>
-              <br><span style="color:var(--text-muted);font-size:0.83rem">Files are encrypted with a 256-bit key before leaving the server</span>
+              <br><span>Files are encrypted with a 256-bit key before leaving the server</span>
             </div>
           </li>
-          <li style="border-bottom:1px solid var(--border);padding:0.7rem 0">
+          <li>
             <div>
               <strong>5 MB Chunking</strong>
-              <br><span style="color:var(--text-muted);font-size:0.83rem">Encrypted data is split — no single seller has your full file</span>
+              <br><span>Encrypted data is split — no single seller has your full file</span>
             </div>
           </li>
-          <li style="border-bottom:1px solid var(--border);padding:0.7rem 0">
+          <li>
             <div>
               <strong>SHA-256 Integrity Check</strong>
-              <br><span style="color:var(--text-muted);font-size:0.83rem">Each chunk has a hash. Download fails if any chunk is tampered</span>
+              <br><span>Each chunk has a hash. Download fails if any chunk is tampered</span>
             </div>
           </li>
-          <li style="padding:0.7rem 0">
+          <li>
             <div>
               <strong>Distributed Storage</strong>
-              <br><span style="color:var(--text-muted);font-size:0.83rem">Chunks spread across multiple seller Dropbox accounts</span>
+              <br><span>Chunks spread across multiple seller Dropbox accounts</span>
             </div>
           </li>
         </ol>
@@ -221,13 +150,13 @@
 
     <!-- ── File List ───────────────────────────────────────────────────────── -->
     <div class="card">
-      <div class="card-header" style="justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:0.7rem">
-          <div class="card-icon icon-purple">📂</div>
+      <div class="card-header">
+        <div>
+          <div class="card-icon icon-purple">FL</div>
           <h3>Uploaded Files</h3>
         </div>
-        <button class="btn btn-ghost" onclick="refreshFileList()" style="font-size:0.82rem">
-          🔄 Refresh
+        <button class="btn btn-ghost" onclick="refreshFileList()">
+          Refresh
         </button>
       </div>
 
@@ -253,7 +182,7 @@
 <script src="app.js"></script>
 <script>
   // ── Config ──────────────────────────────────────────────────────────────
-  window.RENTABYTE_API_BASE        = "http://localhost:8000";
+  window.RENTABYTE_API_BASE        = "";
   window.RENTABYTE_CONTRACT        = "0xe21092e562933E14F2F8D624D04E5a000e356835";
   window.RENTABYTE_PLATFORM_WALLET = "0xC913d8B68ACCFE2b1AEB8805D48D802547C827A1";
 
@@ -293,20 +222,20 @@
     const hash = document.getElementById("input-tx-hash").value.trim();
     if (!hash) { RentAByte.showToast("Enter a tx hash.", "warn"); return; }
     RentAByte.State.activeTxHash = hash;
-    RentAByte.showToast("Allocation tx hash set ✅", "success");
+    RentAByte.showToast("Allocation tx hash set.", "success");
   }
 
   // ── File type icon ────────────────────────────────────────────────────────
   function fileIcon(name) {
     const ext = (name || "").split(".").pop().toLowerCase();
     const map = {
-      pdf:"📄", png:"🖼️", jpg:"🖼️", jpeg:"🖼️", gif:"🖼️", webp:"🖼️",
-      mp4:"🎬", mov:"🎬", avi:"🎬", mp3:"🎵", wav:"🎵",
-      zip:"📦", tar:"📦", gz:"📦", rar:"📦",
-      txt:"📝", md:"📝", csv:"📊", xlsx:"📊", xls:"📊",
-      doc:"📄", docx:"📄", py:"🐍", js:"⚡", html:"🌐", css:"🎨",
+      pdf:"PDF", png:"IMG", jpg:"IMG", jpeg:"IMG", gif:"IMG", webp:"IMG",
+      mp4:"VID", mov:"VID", avi:"VID", mp3:"AUD", wav:"AUD",
+      zip:"ZIP", tar:"ZIP", gz:"ZIP", rar:"ZIP",
+      txt:"TXT", md:"TXT", csv:"TAB", xlsx:"TAB", xls:"TAB",
+      doc:"DOC", docx:"DOC", py:"PY", js:"JS", html:"WEB", css:"CSS",
     };
-    return map[ext] || "📁";
+    return map[ext] || "FILE";
   }
 
   function formatSize(bytes) {
@@ -339,21 +268,21 @@
 
     container.innerHTML = files.map(f => `
       <div class="file-row">
-        <div style="display:flex;align-items:center;gap:0.6rem;min-width:0">
+        <div>
           <span class="file-icon">${fileIcon(f.original_name)}</span>
-          <div style="min-width:0">
+          <div>
             <div class="file-name">${f.original_name}</div>
             <div class="file-meta">${formatSize(f.file_size)} · ${formatDate(f.created_at)}</div>
           </div>
         </div>
-        <span class="tag tag-cyan" style="white-space:nowrap">${formatSize(f.file_size)}</span>
-        <button class="btn btn-outline" style="font-size:0.82rem;white-space:nowrap"
+        <span class="tag tag-cyan">${formatSize(f.file_size)}</span>
+        <button class="btn btn-outline"
                 onclick="handleDownload('${f.file_id}','${f.original_name}')">
-          ⬇️ Download
+          Download
         </button>
-        <button class="btn btn-ghost" style="font-size:0.75rem;color:var(--text-muted)"
+        <button class="btn btn-ghost"
                 onclick="copyToClipboard('${f.file_id}')">
-          📋
+          Copy ID
         </button>
       </div>
     `).join("");
@@ -406,12 +335,12 @@
       const data = await RentAByte.uploadFile(file, txHash);
       barEl.style.width  = "100%";
       pctEl.textContent  = "100%";
-      msgEl.innerHTML    = `✅ Uploaded! File ID: <code style="font-size:0.78rem">${data.file_id}</code>`;
+      msgEl.innerHTML    = `Uploaded. File ID: <code>${data.file_id}</code>`;
       RentAByte.showToast(`${file.name} uploaded successfully!`, "success");
       await refreshFileList();
     } catch (err) {
       barEl.style.width = "0%";
-      msgEl.innerHTML   = `❌ ${err.message}`;
+      msgEl.innerHTML   = err.message;
       RentAByte.showToast("Upload failed: " + err.message, "error");
     }
   }

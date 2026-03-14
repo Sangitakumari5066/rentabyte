@@ -7,52 +7,6 @@
   <link rel="stylesheet" href="style.css" />
   <!-- ethers.js v6 CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
-  <style>
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
-
-    .role-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
-    .role-tab  { flex: 1; padding: 0.7rem; text-align: center; border: 1px solid var(--border);
-                 border-radius: var(--radius-sm); cursor: pointer; transition: all var(--transition);
-                 background: transparent; color: var(--text-secondary); font-weight: 600; }
-    .role-tab.active { border-color: var(--accent-purple); background: rgba(124,58,237,0.15); color: #a78bfa; }
-    .role-panel { display: none; }
-    .role-panel.active { display: block; }
-
-    .step-list { counter-reset: steps; list-style: none; }
-    .step-list li {
-      counter-increment: steps;
-      display: flex; align-items: flex-start; gap: 1rem;
-      padding: 0.8rem 0; border-bottom: 1px solid var(--border);
-    }
-    .step-list li:last-child { border-bottom: none; }
-    .step-list li::before {
-      content: counter(steps);
-      display: flex; align-items: center; justify-content: center;
-      min-width: 28px; height: 28px;
-      background: rgba(124,58,237,0.2); border-radius: 50%;
-      color: #a78bfa; font-size: 0.8rem; font-weight: 700;
-    }
-
-    .pool-ring {
-      width: 120px; height: 120px;
-      border-radius: 50%;
-      background: conic-gradient(var(--accent-purple) var(--used-pct, 0%), var(--bg-base) 0%);
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
-      margin: 0 auto 1rem;
-    }
-    .pool-ring::before {
-      content: '';
-      position: absolute; inset: 14px;
-      background: var(--bg-card);
-      border-radius: 50%;
-    }
-    .pool-ring-label {
-      position: relative; z-index: 1;
-      font-size: 1.1rem; font-weight: 700;
-      color: var(--text-primary);
-    }
-  </style>
 </head>
 <body>
 
@@ -60,18 +14,7 @@
 <nav>
   <div class="container nav-inner">
     <a href="index.html" class="nav-logo">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2L2 7l10 5 10-5-10-5z" fill="url(#g1)"/>
-        <path d="M2 17l10 5 10-5" stroke="url(#g1)" stroke-width="2" fill="none"/>
-        <path d="M2 12l10 5 10-5" stroke="url(#g1)" stroke-width="2" fill="none"/>
-        <defs>
-          <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#7c3aed"/>
-            <stop offset="100%" stop-color="#06b6d4"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      RentAByte
+      <img src="logo.png" alt="RentAByte" />
     </a>
     <div class="nav-links">
       <a href="index.html" class="active">Dashboard</a>
@@ -79,7 +22,7 @@
       <a href="https://faucet.polygon.technology" target="_blank">Get Test POL</a>
     </div>
     <button id="btn-connect-wallet" class="btn btn-primary" onclick="handleConnectWallet()">
-      🦊 Connect MetaMask
+      Connect MetaMask
     </button>
   </div>
 </nav>
@@ -87,15 +30,15 @@
 <!-- ── Hero ───────────────────────────────────────────────────────────────── -->
 <div class="container">
   <section class="hero">
-    <div class="hero-badge">⛓ Polygon Amoy Testnet</div>
+    <div class="hero-badge">Polygon Amoy Testnet</div>
     <h1>Rent unused storage.<br><span>Pay with crypto.</span></h1>
     <p class="subtitle">
       RentAByte connects people who have spare Dropbox space with buyers
       who need affordable, decentralised cloud storage — all payments on Polygon.
     </p>
-    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="handleConnectWallet()">🦊 Get Started</button>
-      <a href="upload.html" class="btn btn-outline">📁 Upload Files</a>
+    <div>
+      <button class="btn btn-primary" onclick="handleConnectWallet()">Get Started</button>
+      <a href="upload.html" class="btn btn-outline">Upload Files</a>
     </div>
   </section>
 
@@ -119,20 +62,20 @@
       <span class="stat-value" id="pool-price">…</span>
       <span class="stat-label">Price</span>
     </div>
-    <div class="stat-item" style="flex:1;min-width:160px">
+    <div class="stat-item">
       <span class="stat-label">Pool Utilisation</span>
       <div class="progress-bar">
-        <div class="progress-fill" id="pool-progress-fill" style="width:0%"></div>
+        <div class="progress-fill" id="pool-progress-fill"></div>
       </div>
-      <span style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem" id="pool-used-pct">0%</span>
+      <span id="pool-used-pct">0%</span>
     </div>
   </div>
 
   <!-- ── Role Selector ─────────────────────────────────────────────────────── -->
   <section>
     <div class="role-tabs">
-      <button class="role-tab active" onclick="switchRole('buyer')">🛒 I'm a Buyer</button>
-      <button class="role-tab"        onclick="switchRole('seller')">💾 I'm a Seller</button>
+      <button class="role-tab active" onclick="switchRole('buyer')">Buyer</button>
+      <button class="role-tab"        onclick="switchRole('seller')">Seller</button>
     </div>
 
     <!-- ── BUYER PANEL ──────────────────────────────────────────────────────── -->
@@ -142,15 +85,15 @@
         <!-- Purchase Storage Card -->
         <div class="card">
           <div class="card-header">
-            <div class="card-icon icon-purple">🛒</div>
+            <div class="card-icon icon-purple">B</div>
             <div>
               <h3>Purchase Storage</h3>
-              <p style="margin:0;font-size:0.82rem">Pay with POL tokens via MetaMask</p>
+              <p>Pay with POL tokens via MetaMask</p>
             </div>
           </div>
 
-          <div id="buyer-wallet-alert" class="alert alert-warn" style="display:none">
-            ⚠️ Please connect your MetaMask wallet first.
+          <div id="buyer-wallet-alert" class="alert alert-warn">
+            Please connect your MetaMask wallet first.
           </div>
 
           <div class="form-group">
@@ -161,33 +104,33 @@
           </div>
 
           <div class="alert alert-info" id="price-preview">
-            💡 Cost: <strong id="cost-preview">0.005</strong> POL for
+            Cost: <strong id="cost-preview">0.005</strong> POL for
             <strong id="mb-preview">500</strong> MB
           </div>
 
-          <button class="btn btn-primary" style="width:100%"
+          <button class="btn btn-primary"
                   id="btn-buy-storage"
                   onclick="handleBuyStorage()">
-            💳 Pay &amp; Allocate Storage
+            Pay &amp; Allocate Storage
           </button>
 
-          <div id="tx-result" style="margin-top:1rem;display:none" class="alert alert-success"></div>
+          <div id="tx-result" class="alert alert-success"></div>
         </div>
 
         <!-- How It Works Card -->
         <div class="card">
           <div class="card-header">
-            <div class="card-icon icon-cyan">📖</div>
+            <div class="card-icon icon-cyan">I</div>
             <div><h3>How It Works</h3></div>
           </div>
           <ol class="step-list">
-            <li><div><strong>Connect MetaMask</strong><br><span style="color:var(--text-muted);font-size:0.85rem">Polygon Amoy Testnet (free test POL from faucet)</span></div></li>
-            <li><div><strong>Choose storage size</strong><br><span style="color:var(--text-muted);font-size:0.85rem">100 MB = 0.001 POL. Pay instantly via MetaMask</span></div></li>
-            <li><div><strong>Upload files</strong><br><span style="color:var(--text-muted);font-size:0.85rem">Files are encrypted, split into 5 MB chunks &amp; distributed</span></div></li>
-            <li><div><strong>Download anytime</strong><br><span style="color:var(--text-muted);font-size:0.85rem">Chunks are reassembled and decrypted on demand</span></div></li>
+            <li><div><strong>Connect MetaMask</strong><br><span>Polygon Amoy Testnet (free test POL from faucet)</span></div></li>
+            <li><div><strong>Choose storage size</strong><br><span>100 MB = 0.001 POL. Pay instantly via MetaMask</span></div></li>
+            <li><div><strong>Upload files</strong><br><span>Files are encrypted, split into 5 MB chunks &amp; distributed</span></div></li>
+            <li><div><strong>Download anytime</strong><br><span>Chunks are reassembled and decrypted on demand</span></div></li>
           </ol>
-          <a href="upload.html" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:1rem">
-            📁 Go to My Files →
+          <a href="upload.html" class="btn btn-outline">
+            Go to My Files →
           </a>
         </div>
 
@@ -201,15 +144,15 @@
         <!-- Connect Dropbox Card -->
         <div class="card">
           <div class="card-header">
-            <div class="card-icon icon-cyan">📦</div>
+            <div class="card-icon icon-cyan">DB</div>
             <div>
               <h3>Connect Dropbox</h3>
-              <p style="margin:0;font-size:0.82rem">Link your Dropbox to contribute storage</p>
+              <p>Link your Dropbox to contribute storage</p>
             </div>
           </div>
 
-          <div class="alert alert-info" style="font-size:0.82rem;margin-bottom:1rem">
-            ℹ️ Generate a Dropbox access token at
+          <div class="alert alert-info">
+            Generate a Dropbox access token at
             <a href="https://www.dropbox.com/developers/apps" target="_blank">dropbox.com/developers</a>
             and paste it below.
           </div>
@@ -220,19 +163,19 @@
                    placeholder="sl.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" />
           </div>
 
-          <button class="btn btn-primary" style="width:100%" onclick="handleConnectDropbox()">
-            🔗 Connect Dropbox
+          <button class="btn btn-primary" onclick="handleConnectDropbox()">
+            Connect Dropbox
           </button>
-          <div id="dropbox-result" style="margin-top:0.75rem"></div>
+          <div id="dropbox-result"></div>
         </div>
 
         <!-- Register Storage Card -->
         <div class="card">
           <div class="card-header">
-            <div class="card-icon icon-green">📡</div>
+            <div class="card-icon icon-green">N</div>
             <div>
               <h3>Register Storage</h3>
-              <p style="margin:0;font-size:0.82rem">Contribute space to the pool</p>
+              <p>Contribute space to the pool</p>
             </div>
           </div>
 
@@ -242,40 +185,37 @@
                    placeholder="e.g. 2000" />
           </div>
 
-          <div class="alert alert-warn" style="font-size:0.82rem;margin-bottom:1rem">
-            ⚠️ You must connect Dropbox before registering. The amount you share
+          <div class="alert alert-warn">
+            You must connect Dropbox before registering. The amount you share
             must be available in your Dropbox account.
           </div>
 
-          <button class="btn btn-primary" style="width:100%" onclick="handleRegisterStorage()">
-            ✅ Register Storage Node
+          <button class="btn btn-primary" onclick="handleRegisterStorage()">
+            Register Storage Node
           </button>
-          <div id="register-result" style="margin-top:0.75rem"></div>
+          <div id="register-result"></div>
         </div>
 
       </div>
 
       <!-- Seller benefits -->
-      <div class="card" style="margin-top:1.2rem">
+      <div class="card">
         <div class="card-header">
-          <div class="card-icon icon-purple">💰</div>
+          <div class="card-icon icon-purple">POL</div>
           <div><h3>Why Become a Seller?</h3></div>
         </div>
-        <div class="grid-3" style="margin-top:0.5rem">
-          <div style="padding:1rem;background:var(--bg-base);border-radius:var(--radius-sm)">
-            <div style="font-size:1.5rem;margin-bottom:0.4rem">🚀</div>
-            <h3 style="font-size:0.95rem;margin-bottom:0.3rem">Monetise Idle Space</h3>
-            <p style="font-size:0.83rem;margin:0">Turn that unused Dropbox quota into POL tokens on the Polygon network.</p>
+        <div class="grid-3">
+          <div>
+            <h3>Monetise Idle Space</h3>
+            <p>Turn that unused Dropbox quota into POL tokens on the Polygon network.</p>
           </div>
-          <div style="padding:1rem;background:var(--bg-base);border-radius:var(--radius-sm)">
-            <div style="font-size:1.5rem;margin-bottom:0.4rem">🔒</div>
-            <h3 style="font-size:0.95rem;margin-bottom:0.3rem">Zero Risk</h3>
-            <p style="font-size:0.83rem;margin:0">Files are encrypted before chunking — you never see the buyer's data.</p>
+          <div>
+            <h3>Zero Risk</h3>
+            <p>Files are encrypted before chunking — you never see the buyer's data.</p>
           </div>
-          <div style="padding:1rem;background:var(--bg-base);border-radius:var(--radius-sm)">
-            <div style="font-size:1.5rem;margin-bottom:0.4rem">⚡</div>
-            <h3 style="font-size:0.95rem;margin-bottom:0.3rem">Instant Setup</h3>
-            <p style="font-size:0.83rem;margin:0">Connect wallet + Dropbox in under 2 minutes. No servers to run.</p>
+          <div>
+            <h3>Instant Setup</h3>
+            <p>Connect wallet + Dropbox in under 2 minutes. No servers to run.</p>
           </div>
         </div>
       </div>
@@ -287,7 +227,7 @@
 <footer>
   <div class="container">
     <p>RentAByte — Built for hackathon demonstration on Polygon Amoy Testnet</p>
-    <p style="margin-top:0.3rem">
+    <p>
       <a href="https://faucet.polygon.technology" target="_blank">Get Test POL</a> ·
       <a href="https://amoy.polygonscan.com" target="_blank">Block Explorer</a> ·
       <a href="https://www.dropbox.com/developers" target="_blank">Dropbox Dev</a>
@@ -300,7 +240,7 @@
 <script>
   // ── Page-specific config ────────────────────────────────────────────────
   // Override these via your deployment environment or hardcode after Hardhat deploy
-  window.RENTABYTE_API_BASE        = "http://localhost:8000";
+  window.RENTABYTE_API_BASE        = "";
   window.RENTABYTE_CONTRACT        = "0xe21092e562933E14F2F8D624D04E5a000e356835";
   window.RENTABYTE_PLATFORM_WALLET = "0xC913d8B68ACCFE2b1AEB8805D48D802547C827A1";
 
@@ -354,13 +294,13 @@
       const { txHash } = await RentAByte.requestStorage(mb);
       const result = document.getElementById("tx-result");
       result.style.display = "";
-      result.innerHTML = `✅ Storage allocated! Tx: <code style="font-size:0.8rem">${txHash}</code>
-        <br><a href="upload.html" class="btn btn-outline" style="margin-top:0.5rem;display:inline-flex">📁 Upload Files →</a>`;
+      result.innerHTML = `Storage allocated. Tx: <code>${txHash}</code>
+        <br><a href="upload.html" class="btn btn-outline">Upload Files →</a>`;
     } catch (err) {
       RentAByte.showToast(err.message, "error");
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '💳 Pay &amp; Allocate Storage';
+      btn.innerHTML = 'Pay &amp; Allocate Storage';
     }
   }
 
@@ -372,10 +312,10 @@
     try {
       const data = await RentAByte.connectDropbox(token);
       const el   = document.getElementById("dropbox-result");
-      el.innerHTML = `<div class="alert alert-success">✅ ${data.message}</div>`;
+      el.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
     } catch (err) {
       document.getElementById("dropbox-result").innerHTML =
-        `<div class="alert alert-error">❌ ${err.message}</div>`;
+        `<div class="alert alert-error">${err.message}</div>`;
     }
   }
 
@@ -386,10 +326,10 @@
     try {
       const data = await RentAByte.registerStorage(mb);
       document.getElementById("register-result").innerHTML =
-        `<div class="alert alert-success">✅ Node #${data.node_id} registered with ${data.registered_mb} MB</div>`;
+        `<div class="alert alert-success">Node #${data.node_id} registered with ${data.registered_mb} MB</div>`;
     } catch (err) {
       document.getElementById("register-result").innerHTML =
-        `<div class="alert alert-error">❌ ${err.message}</div>`;
+        `<div class="alert alert-error">${err.message}</div>`;
     }
   }
 </script>
