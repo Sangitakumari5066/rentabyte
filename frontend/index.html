@@ -3,64 +3,774 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RentAByte – Decentralised Storage Marketplace</title>
-  <link rel="stylesheet" href="style.css" />
-  <!-- ethers.js v6 CDN -->
+  <title>RentAByte – Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@400;700;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --p0: #ffffff;
+      --p1: #f3ecfd;
+      --p2: #d9c3f8;
+      --p3: #b48ef0;
+      --p4: #8247e5;
+      --p5: #6233c6;
+      --p6: #3d1a8f;
+      --p7: #1e0a52;
+      --ink: #0e0520;
+      --line: 1.5px solid var(--ink);
+      --line-soft: 1px solid var(--p2);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--p0);
+      color: var(--ink);
+      font-family: 'Courier Prime', monospace;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      display: flex;
+      align-items: stretch;
+      height: 56px;
+      border-bottom: var(--line);
+      position: sticky;
+      top: 0;
+      background: var(--p0);
+      z-index: 100;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 2rem;
+      border-right: var(--line);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .nav-logo img { height: 45px; }
+
+    .nav-wordmark {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 1.3rem;
+      letter-spacing: 0.04em;
+      color: var(--ink);
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: stretch;
+      flex: 1;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      padding: 0 1.4rem;
+      border-right: var(--line);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--ink);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      background: var(--ink);
+      color: var(--p0);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+    }
+
+    #btn-connect-wallet {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      height: 100%;
+      padding: 0 1.6rem;
+      border: none;
+      border-left: var(--line);
+      background: var(--p4);
+      color: var(--p0);
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    #btn-connect-wallet:hover { background: var(--p5); }
+
+    /* ─── TICKER ─── */
+    .ticker-wrap {
+      overflow: hidden;
+      background: var(--ink);
+      padding: 0.55rem 0;
+      white-space: nowrap;
+      border-bottom: var(--line);
+    }
+
+    .ticker-inner {
+      display: inline-flex;
+      animation: ticker 28s linear infinite;
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 1.2rem;
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--p0);
+      padding-right: 2.2rem;
+    }
+
+    .ticker-dot {
+      width: 5px; height: 5px;
+      background: var(--p4);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── ALERT AREA ─── */
+    #alert-area { padding: 0 2rem; }
+
+    /* ─── HERO ─── */
+    .hero-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: var(--line);
+    }
+
+    .hero-content {
+      padding: 3.5rem 2.5rem;
+      border-right: var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-content::after {
+      content: 'RENT';
+      position: absolute;
+      bottom: -0.1em;
+      right: -0.05em;
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: clamp(8rem, 14vw, 14rem);
+      color: var(--p1);
+      pointer-events: none;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      z-index: 0;
+    }
+
+    .hero-badge {
+      position: relative;
+      z-index: 1;
+      display: none;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--p4);
+      width: fit-content;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--p4);
+      border-radius: 50%;
+      animation: blink 2s ease infinite;
+      display: none;
+    }
+
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.2; }
+    }
+
+    .hero-content h1 {
+      position: relative;
+      z-index: 1;
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2.8rem, 5vw, 4.8rem);
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+
+    .hero-content h1 span { color: var(--p4); display: block; }
+
+    .hero-content .subtitle {
+      position: relative;
+      z-index: 1;
+      font-size: 0.82rem;
+      line-height: 1.75;
+      color: var(--p6);
+      max-width: 380px;
+    }
+
+    .hero-cta {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      display: flex;
+      flex-direction: column;
+      border-left: none;
+    }
+
+    .stat-item {
+      flex: 1;
+      padding: 1.4rem 2rem;
+      border-bottom: var(--line-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .stat-item:last-child { border-bottom: none; }
+
+    .stat-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--p3);
+    }
+
+    .stat-value {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 2rem;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--p2);
+      margin: 0.4rem 0 0.3rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--p4);
+      width: 0%;
+      transition: width 0.6s ease;
+    }
+
+    #pool-used-pct {
+      font-size: 0.72rem;
+      color: var(--p4);
+      letter-spacing: 0.06em;
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      padding: 0.75rem 1.6rem;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-primary {
+      color: var(--p0);
+      background: var(--p4);
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    }
+
+    .btn-primary:hover { background: var(--p5); }
+
+    .btn-outline {
+      color: var(--ink);
+      background: transparent;
+      border: 1.5px solid var(--ink);
+    }
+
+    .btn-outline:hover { background: var(--ink); color: var(--p0); }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 12px; height: 12px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── ROLE TABS ─── */
+    .role-tabs-wrap {
+      display: flex;
+      border-bottom: var(--line);
+    }
+
+    .role-tab {
+      flex: 1;
+      padding: 1.1rem 2rem;
+      border: none;
+      background: var(--p0);
+      border-right: var(--line);
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--p3);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-align: left;
+    }
+
+    .role-tab:last-child { border-right: none; }
+    .role-tab:hover { background: var(--p1); color: var(--ink); }
+
+    .role-tab.active {
+      background: var(--ink);
+      color: var(--p0);
+    }
+
+    /* ─── PANELS ─── */
+    .role-panel { display: none; }
+    .role-panel.active { display: block; }
+
+    /* ─── LAYOUT GRID ─── */
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: var(--line);
+    }
+
+    .panel-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-bottom: var(--line);
+    }
+
+    /* ─── CARDS ─── */
+    .card {
+      padding: 2.2rem 2.5rem;
+      border-right: var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .card:last-child { border-right: none; }
+
+    .card-full {
+      padding: 2.2rem 2.5rem;
+      border-top: var(--line);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding-bottom: 1.2rem;
+      border-bottom: var(--line-soft);
+    }
+
+    .card-icon {
+      width: 40px; height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    .icon-purple { background: var(--p4); color: var(--p0); }
+    .icon-cyan   { background: var(--p6); color: var(--p0); }
+    .icon-green  { background: var(--ink); color: var(--p2); }
+
+    .card-header h3 {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+
+    .card-header p {
+      font-size: 0.72rem;
+      color: var(--p5);
+      margin-top: 0.2rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* ─── FORMS ─── */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .form-group label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--p5);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: 1.5px solid var(--ink);
+      background: var(--p0);
+      color: var(--ink);
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-group input:focus { border-color: var(--p4); }
+    .form-group input::placeholder { color: var(--p3); }
+
+    /* ─── ALERTS ─── */
+    .alert {
+      padding: 0.85rem 1.1rem;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      border-left: 3px solid transparent;
+      display: none;
+    }
+
+    .alert-warn  { border-left-color: #f0a500; background: #fffbec; color: #6b4a00; display: block; }
+    .alert-info  { border-left-color: var(--p4); background: var(--p1); color: var(--p6); display: block; }
+    .alert-success { border-left-color: #2da44e; background: #f0fdf4; color: #14532d; }
+    .alert-error { border-left-color: #dc2626; background: #fef2f2; color: #7f1d1d; }
+
+    .alert a {
+      color: inherit;
+      font-weight: 700;
+      text-underline-offset: 3px;
+    }
+
+    code {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.75rem;
+      background: var(--p1);
+      padding: 0.1em 0.4em;
+      border: 1px solid var(--p2);
+      word-break: break-all;
+    }
+
+    /* ─── STEP LIST ─── */
+    .step-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      counter-reset: steps;
+    }
+
+    .step-list li {
+      display: grid;
+      grid-template-columns: 2.2rem 1fr;
+      gap: 0.8rem;
+      align-items: baseline;
+      padding: 0.9rem 0;
+      border-bottom: var(--line-soft);
+      counter-increment: steps;
+    }
+
+    .step-list li:last-child { border-bottom: none; }
+
+    .step-list li::before {
+      content: counter(steps, decimal-leading-zero);
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 1.3rem;
+      color: var(--p3);
+      line-height: 1;
+    }
+
+    .step-list li strong {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--ink);
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+
+    .step-list li span {
+      font-size: 0.75rem;
+      color: var(--p5);
+      line-height: 1.5;
+    }
+
+    /* ─── SELLER BENEFITS ─── */
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+    }
+
+    .benefit-cell {
+      padding: 1.5rem 0;
+      border-right: var(--line-soft);
+      padding-right: 1.8rem;
+      padding-left: 1.8rem;
+    }
+
+    .benefit-cell:first-child { padding-left: 0; }
+    .benefit-cell:last-child  { border-right: none; padding-right: 0; }
+
+    .benefit-num {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 2.5rem;
+      color: var(--p2);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .benefit-cell h3 {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+
+    .benefit-cell p {
+      font-size: 0.75rem;
+      line-height: 1.65;
+      color: var(--p6);
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      margin-top: auto;
+      border-top: var(--line);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .footer-cell {
+      padding: 1.8rem 2.5rem;
+      border-right: var(--line);
+    }
+
+    .footer-cell:last-child { border-right: none; }
+
+    .footer-cell p {
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      color: var(--p5);
+      line-height: 1.8;
+    }
+
+    .footer-cell p a {
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--p3);
+      padding-bottom: 1px;
+      transition: color 0.12s, border-color 0.12s;
+    }
+
+    .footer-cell p a:hover { color: var(--p4); border-color: var(--p4); }
+
+    .footer-brand {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 1.5rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+
+    .footer-brand span { color: var(--p4); }
+
+    /* ─── TOAST ─── */
+    .toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      z-index: 9999;
+    }
+
+    .toast {
+      padding: 0.8rem 1.2rem;
+      background: var(--ink);
+      color: var(--p0);
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      border-left: 3px solid var(--p4);
+      animation: slideIn 0.2s ease;
+      max-width: 340px;
+    }
+
+    .toast.error { border-left-color: #dc2626; }
+    .toast.success { border-left-color: #2da44e; }
+    .toast.info { border-left-color: var(--p3); }
+    .toast.warn  { border-left-color: #f0a500; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hero-strip { grid-template-columns: 1fr; }
+      .hero-content { border-right: none; border-bottom: var(--line); }
+      .stats-bar { flex-direction: row; flex-wrap: wrap; }
+      .stat-item { border-right: var(--line-soft); }
+      .panel-grid, .panel-grid-3 { grid-template-columns: 1fr; }
+      .card { border-right: none; border-bottom: var(--line); }
+      .benefits-grid { grid-template-columns: 1fr; }
+      .benefit-cell { border-right: none; border-bottom: var(--line-soft); padding: 1.2rem 0; }
+      footer { grid-template-columns: 1fr; }
+      .footer-cell { border-right: none; border-bottom: var(--line); }
+    }
+  </style>
 </head>
 <body>
 
-<!-- ── Navbar ─────────────────────────────────────────────────────────────── -->
+<!-- ── NAV ── -->
 <nav>
-  <div class="container nav-inner">
-    <a href="index.html" class="nav-logo">
-      <img src="logo.png" alt="RentAByte" />
-    </a>
-    <div class="nav-links">
-      <a href="index.html" class="active">Dashboard</a>
-      <a href="upload.html">My Files</a>
-      <a href="https://faucet.polygon.technology" target="_blank">Get Test POL</a>
-    </div>
-    <button id="btn-connect-wallet" class="btn btn-primary" onclick="handleConnectWallet()">
-      Connect MetaMask
-    </button>
+  <a href="index.html" class="nav-logo">
+    <img src="logo.png" alt="RentAByte" />
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="active">Dashboard</a>
+    <a href="upload.html">My Files</a>
+    <a href="https://faucet.polygon.technology" target="_blank">Get Test POL</a>
   </div>
+  <button id="btn-connect-wallet" onclick="handleConnectWallet()">
+    <img src="metamask.png" alt="MetaMask" style="width: 16px; height: 16px;">
+    Connect MetaMask
+  </button>
 </nav>
 
-<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
-<div class="container">
-  <section class="hero">
-    <div class="hero-badge">Polygon Amoy Testnet</div>
-    <h1>Rent unused storage.<br><span>Pay with crypto.</span></h1>
+<!-- ── TICKER ── -->
+<div class="ticker-wrap" aria-hidden="true">
+  <div class="ticker-inner">
+    <span class="ticker-item"><span class="ticker-dot"></span>Polygon Amoy Testnet</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Rent Storage</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Pay with POL</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>E2E Encrypted</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>On-chain Contracts</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Zero Custody</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Open Protocol</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Polygon Amoy Testnet</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Rent Storage</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Pay with POL</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>E2E Encrypted</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>On-chain Contracts</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Zero Custody</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Open Protocol</span>
+  </div>
+</div>
+
+<!-- ── HERO + STATS ── -->
+<div class="hero-strip">
+  <section class="hero-content">
+    <h1>
+      Rent unused<br>storage.
+      <span>Pay with<br>crypto.</span>
+    </h1>
     <p class="subtitle">
       RentAByte connects people who have spare Dropbox space with buyers
-      who need affordable, decentralised cloud storage — all payments on Polygon.
+      who need affordable, decentralised cloud storage. All payments settle on Polygon.
     </p>
-    <div>
+    <div class="hero-cta">
       <button class="btn btn-primary" onclick="handleConnectWallet()">Get Started</button>
       <a href="upload.html" class="btn btn-outline">Upload Files</a>
     </div>
   </section>
 
-  <!-- ── Pool Stats ────────────────────────────────────────────────────────── -->
-  <div id="alert-area"></div>
-
   <div class="stats-bar">
     <div class="stat-item">
-      <span class="stat-value" id="pool-total">…</span>
       <span class="stat-label">Total Pool</span>
+      <span class="stat-value" id="pool-total">—</span>
     </div>
     <div class="stat-item">
-      <span class="stat-value" id="pool-available">…</span>
       <span class="stat-label">Available</span>
+      <span class="stat-value" id="pool-available">—</span>
     </div>
     <div class="stat-item">
-      <span class="stat-value" id="pool-nodes">…</span>
       <span class="stat-label">Storage Nodes</span>
+      <span class="stat-value" id="pool-nodes">—</span>
     </div>
     <div class="stat-item">
-      <span class="stat-value" id="pool-price">…</span>
       <span class="stat-label">Price</span>
+      <span class="stat-value" id="pool-price">—</span>
     </div>
     <div class="stat-item">
       <span class="stat-label">Pool Utilisation</span>
@@ -70,192 +780,217 @@
       <span id="pool-used-pct">0%</span>
     </div>
   </div>
-
-  <!-- ── Role Selector ─────────────────────────────────────────────────────── -->
-  <section>
-    <div class="role-tabs">
-      <button class="role-tab active" onclick="switchRole('buyer')">Buyer</button>
-      <button class="role-tab"        onclick="switchRole('seller')">Seller</button>
-    </div>
-
-    <!-- ── BUYER PANEL ──────────────────────────────────────────────────────── -->
-    <div id="panel-buyer" class="role-panel active">
-      <div class="grid-2">
-
-        <!-- Purchase Storage Card -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-icon icon-purple">B</div>
-            <div>
-              <h3>Purchase Storage</h3>
-              <p>Pay with POL tokens via MetaMask</p>
-            </div>
-          </div>
-
-          <div id="buyer-wallet-alert" class="alert alert-warn">
-            Please connect your MetaMask wallet first.
-          </div>
-
-          <div class="form-group">
-            <label>Storage Amount (MB)</label>
-            <input type="number" id="input-storage-mb" min="100" step="100" value="500"
-                   placeholder="e.g. 500"
-                   oninput="updatePricePreview()" />
-          </div>
-
-          <div class="alert alert-info" id="price-preview">
-            Cost: <strong id="cost-preview">0.005</strong> POL for
-            <strong id="mb-preview">500</strong> MB
-          </div>
-
-          <button class="btn btn-primary"
-                  id="btn-buy-storage"
-                  onclick="handleBuyStorage()">
-            Pay &amp; Allocate Storage
-          </button>
-
-          <div id="tx-result" class="alert alert-success"></div>
-        </div>
-
-        <!-- How It Works Card -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-icon icon-cyan">I</div>
-            <div><h3>How It Works</h3></div>
-          </div>
-          <ol class="step-list">
-            <li><div><strong>Connect MetaMask</strong><br><span>Polygon Amoy Testnet (free test POL from faucet)</span></div></li>
-            <li><div><strong>Choose storage size</strong><br><span>100 MB = 0.001 POL. Pay instantly via MetaMask</span></div></li>
-            <li><div><strong>Upload files</strong><br><span>Files are encrypted, split into 5 MB chunks &amp; distributed</span></div></li>
-            <li><div><strong>Download anytime</strong><br><span>Chunks are reassembled and decrypted on demand</span></div></li>
-          </ol>
-          <a href="upload.html" class="btn btn-outline">
-            Go to My Files →
-          </a>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ── SELLER PANEL ─────────────────────────────────────────────────────── -->
-    <div id="panel-seller" class="role-panel">
-      <div class="grid-2">
-
-        <!-- Connect Dropbox Card -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-icon icon-cyan">DB</div>
-            <div>
-              <h3>Connect Dropbox</h3>
-              <p>Link your Dropbox to contribute storage</p>
-            </div>
-          </div>
-
-          <div class="alert alert-info">
-            Generate a Dropbox access token at
-            <a href="https://www.dropbox.com/developers/apps" target="_blank">dropbox.com/developers</a>
-            and paste it below.
-          </div>
-
-          <div class="form-group">
-            <label>Dropbox Access Token</label>
-            <input type="password" id="input-dropbox-token"
-                   placeholder="sl.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" />
-          </div>
-
-          <button class="btn btn-primary" onclick="handleConnectDropbox()">
-            Connect Dropbox
-          </button>
-          <div id="dropbox-result"></div>
-        </div>
-
-        <!-- Register Storage Card -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-icon icon-green">N</div>
-            <div>
-              <h3>Register Storage</h3>
-              <p>Contribute space to the pool</p>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Storage to Share (MB)</label>
-            <input type="number" id="input-register-mb" min="100" step="100" value="1000"
-                   placeholder="e.g. 2000" />
-          </div>
-
-          <div class="alert alert-warn">
-            You must connect Dropbox before registering. The amount you share
-            must be available in your Dropbox account.
-          </div>
-
-          <button class="btn btn-primary" onclick="handleRegisterStorage()">
-            Register Storage Node
-          </button>
-          <div id="register-result"></div>
-        </div>
-
-      </div>
-
-      <!-- Seller benefits -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon icon-purple">POL</div>
-          <div><h3>Why Become a Seller?</h3></div>
-        </div>
-        <div class="grid-3">
-          <div>
-            <h3>Monetise Idle Space</h3>
-            <p>Turn that unused Dropbox quota into POL tokens on the Polygon network.</p>
-          </div>
-          <div>
-            <h3>Zero Risk</h3>
-            <p>Files are encrypted before chunking — you never see the buyer's data.</p>
-          </div>
-          <div>
-            <h3>Instant Setup</h3>
-            <p>Connect wallet + Dropbox in under 2 minutes. No servers to run.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 </div>
 
-<!-- ── Footer ──────────────────────────────────────────────────────────────── -->
+<div id="alert-area"></div>
+
+<!-- ── ROLE TABS ── -->
+<div class="role-tabs-wrap">
+  <button class="role-tab active" onclick="switchRole('buyer')">
+    Buyer — Purchase Storage
+  </button>
+  <button class="role-tab" onclick="switchRole('seller')">
+    Seller — Contribute Space
+  </button>
+</div>
+
+<!-- ── BUYER PANEL ── -->
+<div id="panel-buyer" class="role-panel active">
+  <div class="panel-grid">
+
+    <!-- Purchase Storage -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-purple">B</div>
+        <div>
+          <h3>Purchase Storage</h3>
+          <p>Pay with POL tokens via MetaMask</p>
+        </div>
+      </div>
+
+      <div id="buyer-wallet-alert" class="alert alert-warn">
+        Please connect your MetaMask wallet first.
+      </div>
+
+      <div class="form-group">
+        <label>Storage Amount (MB)</label>
+        <input type="number" id="input-storage-mb" min="100" step="100" value="500"
+               placeholder="e.g. 500"
+               oninput="updatePricePreview()" />
+      </div>
+
+      <div class="alert alert-info" id="price-preview">
+        Cost: <strong id="cost-preview">0.005</strong> POL for
+        <strong id="mb-preview">500</strong> MB
+      </div>
+
+      <button class="btn btn-primary"
+              id="btn-buy-storage"
+              onclick="handleBuyStorage()">
+        Pay &amp; Allocate Storage
+      </button>
+
+      <div id="tx-result" class="alert alert-success"></div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-cyan">?</div>
+        <div><h3>How It Works</h3></div>
+      </div>
+      <ol class="step-list">
+        <li>
+          <div>
+            <strong>Connect MetaMask</strong>
+            <span>Polygon Amoy Testnet — free test POL from faucet</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Choose storage size</strong>
+            <span>100 MB = 0.001 POL. Pay instantly via MetaMask</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Upload files</strong>
+            <span>Files are encrypted, split into 5 MB chunks and distributed</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Download anytime</strong>
+            <span>Chunks are reassembled and decrypted on demand</span>
+          </div>
+        </li>
+      </ol>
+      <a href="upload.html" class="btn btn-outline">Go to My Files</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── SELLER PANEL ── -->
+<div id="panel-seller" class="role-panel">
+  <div class="panel-grid">
+
+    <!-- Connect Dropbox -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-cyan">DB</div>
+        <div>
+          <h3>Connect Dropbox</h3>
+          <p>Link your Dropbox to contribute storage</p>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        Generate a Dropbox access token at
+        <a href="https://www.dropbox.com/developers/apps" target="_blank">dropbox.com/developers</a>
+        and paste it below.
+      </div>
+
+      <div class="form-group">
+        <label>Dropbox Access Token</label>
+        <input type="password" id="input-dropbox-token"
+               placeholder="sl.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" />
+      </div>
+
+      <button class="btn btn-primary" onclick="handleConnectDropbox()">
+        Connect Dropbox
+      </button>
+      <div id="dropbox-result"></div>
+    </div>
+
+    <!-- Register Storage -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-green">N</div>
+        <div>
+          <h3>Register Storage Node</h3>
+          <p>Contribute space to the pool</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Storage to Share (MB)</label>
+        <input type="number" id="input-register-mb" min="100" step="100" value="1000"
+               placeholder="e.g. 2000" />
+      </div>
+
+      <div class="alert alert-warn">
+        You must connect Dropbox before registering. The amount you share
+        must be available in your Dropbox account.
+      </div>
+
+      <button class="btn btn-primary" onclick="handleRegisterStorage()">
+        Register Storage Node
+      </button>
+      <div id="register-result"></div>
+    </div>
+
+  </div>
+
+  <!-- Seller Benefits -->
+  <div class="card-full">
+    <div class="card-header" style="margin-bottom:1.5rem;">
+      <div class="card-icon icon-purple">POL</div>
+      <div><h3>Why Become a Seller?</h3></div>
+    </div>
+    <div class="benefits-grid">
+      <div class="benefit-cell">
+        <div class="benefit-num">01</div>
+        <h3>Monetise Idle Space</h3>
+        <p>Turn that unused Dropbox quota into POL tokens on the Polygon network.</p>
+      </div>
+      <div class="benefit-cell">
+        <div class="benefit-num">02</div>
+        <h3>Zero Risk</h3>
+        <p>Files are encrypted before chunking. You never see the buyer's data.</p>
+      </div>
+      <div class="benefit-cell">
+        <div class="benefit-num">03</div>
+        <h3>Instant Setup</h3>
+        <p>Connect wallet and Dropbox in under 2 minutes. No servers to run.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
 <footer>
-  <div class="container">
-    <p>RentAByte — Built for hackathon demonstration on Polygon Amoy Testnet</p>
+  <div class="footer-cell">
+    <div class="footer-brand">Rent<span>A</span>Byte</div>
+    <p>Built for hackathon demonstration on Polygon Amoy Testnet</p>
+  </div>
+  <div class="footer-cell">
     <p>
-      <a href="https://faucet.polygon.technology" target="_blank">Get Test POL</a> ·
-      <a href="https://amoy.polygonscan.com" target="_blank">Block Explorer</a> ·
-      <a href="https://www.dropbox.com/developers" target="_blank">Dropbox Dev</a>
+      <a href="https://faucet.polygon.technology" target="_blank">Get Test POL</a> &nbsp;&middot;&nbsp;
+      <a href="https://amoy.polygonscan.com" target="_blank">Block Explorer</a> &nbsp;&middot;&nbsp;
+      <a href="https://www.dropbox.com/developers/apps" target="_blank">Dropbox Dev</a>
     </p>
   </div>
 </footer>
 
-<!-- ── Scripts ─────────────────────────────────────────────────────────────── -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ── Scripts ── -->
 <script src="app.js"></script>
 <script>
-  // ── Page-specific config ────────────────────────────────────────────────
-  // Override these via your deployment environment or hardcode after Hardhat deploy
   window.RENTABYTE_API_BASE        = "";
   window.RENTABYTE_CONTRACT        = "0xe21092e562933E14F2F8D624D04E5a000e356835";
   window.RENTABYTE_PLATFORM_WALLET = "0xC913d8B68ACCFE2b1AEB8805D48D802547C827A1";
 
-  // ── Init ────────────────────────────────────────────────────────────────
   document.addEventListener("DOMContentLoaded", async () => {
     await RentAByte.loadStoragePool();
     updatePricePreview();
-    // Auto-reconnect if MetaMask was already connected
     if (window.ethereum) {
       const accounts = await window.ethereum.request({ method: "eth_accounts" });
       if (accounts.length > 0) await connectWallet();
     }
   });
 
-  // ── Role Tabs ───────────────────────────────────────────────────────────
   function switchRole(role) {
     document.querySelectorAll(".role-tab").forEach((t, i) => {
       t.classList.toggle("active", (i === 0 ? "buyer" : "seller") === role);
@@ -264,7 +999,6 @@
     document.getElementById("panel-seller").classList.toggle("active", role === "seller");
   }
 
-  // ── Price Preview ────────────────────────────────────────────────────────
   function updatePricePreview() {
     const mb   = parseInt(document.getElementById("input-storage-mb").value, 10) || 0;
     const cost = RentAByte.polRequired(mb);
@@ -272,7 +1006,6 @@
     document.getElementById("mb-preview").textContent   = mb;
   }
 
-  // ── Handlers ─────────────────────────────────────────────────────────────
   async function handleConnectWallet() {
     await connectWallet();
   }
@@ -287,20 +1020,30 @@
 
     const mb  = parseInt(document.getElementById("input-storage-mb").value, 10);
     const btn = document.getElementById("btn-buy-storage");
+    const result = document.getElementById("tx-result");
+    const originalLabel = btn.innerHTML;
+
+    result.className = "alert";
+    result.style.display = "none";
+    result.textContent = "";
+
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Processing…';
+    btn.innerHTML = '<span class="spinner"></span> Processing...';
 
     try {
-      const { txHash } = await RentAByte.requestStorage(mb);
-      const result = document.getElementById("tx-result");
-      result.style.display = "";
-      result.innerHTML = `Storage allocated. Tx: <code>${txHash}</code>
-        <br><a href="upload.html" class="btn btn-outline">Upload Files →</a>`;
+      const { txHash, data } = await RentAByte.requestStorage(mb);
+      result.className = "alert alert-success";
+      result.style.display = "block";
+      result.innerHTML = `${data.message}<br><br>Tx: <code>${txHash}</code>
+        <br><br><a href="upload.html" class="btn btn-outline">Upload Files</a>`;
     } catch (err) {
+      result.className = "alert alert-error";
+      result.style.display = "block";
+      result.textContent = err.message;
       RentAByte.showToast(err.message, "error");
     } finally {
       btn.disabled = false;
-      btn.innerHTML = 'Pay &amp; Allocate Storage';
+      btn.innerHTML = originalLabel;
     }
   }
 
@@ -311,11 +1054,11 @@
 
     try {
       const data = await RentAByte.connectDropbox(token);
-      const el   = document.getElementById("dropbox-result");
-      el.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+      document.getElementById("dropbox-result").innerHTML =
+        `<div class="alert alert-success" style="display:block">${data.message}</div>`;
     } catch (err) {
       document.getElementById("dropbox-result").innerHTML =
-        `<div class="alert alert-error">${err.message}</div>`;
+        `<div class="alert alert-error" style="display:block">${err.message}</div>`;
     }
   }
 
@@ -326,10 +1069,10 @@
     try {
       const data = await RentAByte.registerStorage(mb);
       document.getElementById("register-result").innerHTML =
-        `<div class="alert alert-success">Node #${data.node_id} registered with ${data.registered_mb} MB</div>`;
+        `<div class="alert alert-success" style="display:block">Node #${data.node_id} registered with ${data.registered_mb} MB</div>`;
     } catch (err) {
       document.getElementById("register-result").innerHTML =
-        `<div class="alert alert-error">${err.message}</div>`;
+        `<div class="alert alert-error" style="display:block">${err.message}</div>`;
     }
   }
 </script>

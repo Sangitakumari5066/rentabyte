@@ -67,27 +67,82 @@ function polRequired(mb) {
   return ((mb / 100) * POL_PER_100MB).toFixed(4);
 }
 
+function getErrorMessage(err) {
+  if (!err) return "Something went wrong.";
+
+  const rawMessage = [
+    err.shortMessage,
+    err.reason,
+    err.message,
+    err?.error?.message,
+    err?.info?.error?.message,
+  ].find(Boolean) || "Something went wrong.";
+
+  const message = String(rawMessage);
+  const lower = message.toLowerCase();
+
+  if (lower.includes("transaction gas price below minimum") || lower.includes("gas tip cap")) {
+    return "The network rejected this transaction because the wallet suggested too low a gas fee. Please retry the transaction in MetaMask.";
+  }
+
+  if (lower.includes("user rejected") || lower.includes("user denied") || err.code === 4001) {
+    return "Transaction was cancelled in MetaMask.";
+  }
+
+  if (lower.includes("insufficient funds")) {
+    return "Your wallet does not have enough POL to cover the payment and gas fee.";
+  }
+
+  if (lower.includes("backend connection failed")) {
+    return message;
+  }
+
+  if (lower.includes("could not coalesce error")) {
+    return "MetaMask could not submit the transaction. Please retry and confirm the network gas settings in MetaMask.";
+  }
+
+  return message;
+}
+
 function showToast(msg, type = "info") {
-  // Simple alert fallback – replace with a toast library for polish
   console.log(`[${type.toUpperCase()}] ${msg}`);
-  // Create a temporary DOM toast
+
+  const host = document.getElementById("toast-container") || document.body;
   const el = document.createElement("div");
-  el.className = `alert alert-${type}`;
-  el.style.cssText = "position:fixed;top:1rem;right:1rem;z-index:9999;max-width:380px;animation:fadeIn .3s";
+  el.className = `toast ${type}`;
   el.textContent = msg;
-  document.body.appendChild(el);
+  host.appendChild(el);
   setTimeout(() => el.remove(), 4500);
 }
 
 async function apiCall(method, path, body = null) {
   const opts = {
     method,
-    headers: { "Content-Type": "application/json" },
+    headers: {},
   };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(API_BASE + path, opts);
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.detail || "API error");
+  if (body !== null) {
+    opts.headers["Content-Type"] = "application/json";
+    opts.body = JSON.stringify(body);
+  }
+
+  let res;
+  try {
+    res = await fetch(API_BASE + path, opts);
+  } catch (err) {
+    throw new Error("Backend connection failed. Check that the API server is running.");
+  }
+
+  const contentType = res.headers.get("content-type") || "";
+  let data = {};
+
+  if (contentType.includes("application/json")) {
+    data = await res.json();
+  } else {
+    const text = await res.text();
+    if (text) data = { detail: text };
+  }
+
+  if (!res.ok) throw new Error(data.detail || data.message || `API error (${res.status})`);
   return data;
 }
 
@@ -140,7 +195,7 @@ async function connectWallet() {
     showToast(`Wallet connected: ${shortAddr(State.walletAddress)}`, "success");
     return State.walletAddress;
   } catch (err) {
-    showToast("Wallet connection failed: " + err.message, "error");
+    showToast("Wallet connection failed: " + getErrorMessage(err), "error");
     return null;
   }
 }
@@ -160,11 +215,9 @@ function updateWalletUI() {
   const btn = document.getElementById("btn-connect-wallet");
   if (btn) {
     if (State.walletAddress) {
-      btn.innerHTML = `<span class="wallet-dot"></span> ${shortAddr(State.walletAddress)}`;
-      btn.className = "wallet-chip";
+      btn.innerHTML = `<img src="metamask.png" alt="MetaMask" style="width: 16px; height: 16px;">${shortAddr(State.walletAddress)}`;
     } else {
-      btn.textContent = "Connect MetaMask";
-      btn.className = "btn btn-primary";
+      btn.innerHTML = '<img src="metamask.png" alt="MetaMask" style="width: 16px; height: 16px;">Connect MetaMask';
     }
   }
 }
@@ -185,25 +238,29 @@ async function payForStorage(storageMB) {
   const polAmount = polRequired(storageMB);
   const valueWei  = ethers.parseEther(polAmount);
 
-  let tx;
-  if (CONTRACT_ADDRESS) {
-    // Use the deployed smart contract
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, State.signer);
-    tx = await contract.payForStorage(storageMB, { value: valueWei });
-  } else {
-    // Direct transfer to platform wallet (simpler demo fallback)
-    const PLATFORM_WALLET = window.RENTABYTE_PLATFORM_WALLET || "";
-    if (!PLATFORM_WALLET) throw new Error("Set RENTABYTE_CONTRACT or RENTABYTE_PLATFORM_WALLET.");
-    tx = await State.signer.sendTransaction({
-      to: PLATFORM_WALLET,
-      value: valueWei,
-    });
-  }
+  try {
+    let tx;
+    if (CONTRACT_ADDRESS) {
+      // Use the deployed smart contract
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, State.signer);
+      tx = await contract.payForStorage(storageMB, { value: valueWei });
+    } else {
+      // Direct transfer to platform wallet (simpler demo fallback)
+      const PLATFORM_WALLET = window.RENTABYTE_PLATFORM_WALLET || "";
+      if (!PLATFORM_WALLET) throw new Error("Set RENTABYTE_CONTRACT or RENTABYTE_PLATFORM_WALLET.");
+      tx = await State.signer.sendTransaction({
+        to: PLATFORM_WALLET,
+        value: valueWei,
+      });
+    }
 
-  showToast("Transaction sent! Waiting for confirmation…", "info");
-  const receipt = await tx.wait(1);   // wait for 1 confirmation
-  showToast(`Payment confirmed! Tx: ${shortAddr(receipt.hash)}`, "success");
-  return receipt.hash;
+    showToast("Transaction sent. Waiting for confirmation...", "info");
+    const receipt = await tx.wait(1);   // wait for 1 confirmation
+    showToast(`Payment confirmed! Tx: ${shortAddr(receipt.hash)}`, "success");
+    return receipt.hash;
+  } catch (err) {
+    throw new Error(getErrorMessage(err));
+  }
 }
 
 // ── Storage Pool ─────────────────────────────────────────────────────────────
@@ -303,8 +360,9 @@ async function requestStorage(storageMB) {
     await loadStoragePool();
     return { txHash, data };
   } catch (err) {
-    showToast("Storage request failed: " + err.message, "error");
-    throw err;
+    const message = getErrorMessage(err);
+    showToast("Storage request failed: " + message, "error");
+    throw new Error(message);
   }
 }
 
@@ -380,5 +438,6 @@ window.RentAByte = {
   loadFileList,
   shortAddr,
   polRequired,
+  getErrorMessage,
   showToast,
 };

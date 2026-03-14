@@ -4,50 +4,698 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RentAByte – Decentralised Storage Marketplace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@400;700;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --p0: #ffffff;
+      --p1: #f3ecfd;
+      --p2: #d9c3f8;
+      --p3: #b48ef0;
+      --p4: #8247e5;
+      --p5: #6233c6;
+      --p6: #3d1a8f;
+      --p7: #1e0a52;
+      --ink: #0e0520;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--p0);
+      color: var(--ink);
+      font-family: 'Courier Prime', monospace;
+      overflow-x: hidden;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      display: flex;
+      align-items: stretch;
+      height: 56px;
+      border-bottom: 1.5px solid var(--ink);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 2rem;
+      border-right: 1.5px solid var(--ink);
+      text-decoration: none;
+    }
+
+    .nav-logo img { height: 45px; }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      padding: 0 1.4rem;
+      border-left: 1.5px solid var(--ink);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--ink);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-link:hover { background: var(--ink); color: var(--p0); }
+
+    .nav-link.cta {
+      background: var(--p4);
+      color: var(--p0);
+      font-weight: 700;
+    }
+
+    .nav-link.cta:hover { background: var(--p5); }
+
+    /* ─── HERO ─── */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      min-height: calc(100vh - 56px);
+      border-bottom: 1.5px solid var(--ink);
+      position: relative;
+    }
+
+    .hero-left {
+      padding: 3.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1.5px solid var(--ink);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-left::before {
+      content: 'STORE';
+      position: absolute;
+      bottom: -0.08em;
+      left: -0.02em;
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: clamp(12rem, 22vw, 22rem);
+      line-height: 1;
+      color: var(--p1);
+      pointer-events: none;
+      z-index: 0;
+      user-select: none;
+      letter-spacing: -0.04em;
+    }
+
+    .hero-tag {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--p5);
+    }
+
+    .hero-tag::before {
+      content: '';
+      width: 32px;
+      height: 1.5px;
+      background: var(--p4);
+    }
+
+    .hero-headline-wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: clamp(4.5rem, 9vw, 9rem);
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+
+    h1 .accent {
+      color: var(--p4);
+      display: block;
+    }
+
+    .hero-sub {
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--p6);
+      max-width: 460px;
+      margin-top: 2rem;
+    }
+
+    .hero-actions {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding-top: 3rem;
+      border-top: 1px solid var(--p2);
+    }
+
+    .btn-launch {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--p0);
+      background: var(--p4);
+      padding: 0.85rem 2rem;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+      transition: background 0.15s;
+    }
+
+    .btn-launch:hover { background: var(--p5); }
+
+    .btn-gh {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--ink);
+      border-bottom: 1.5px solid var(--ink);
+      padding-bottom: 2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .btn-gh:hover { color: var(--p4); border-color: var(--p4); }
+    .btn-gh img { width: 15px; height: 15px; }
+
+    /* ─── HERO RIGHT PANEL ─── */
+    .hero-right {
+      background: var(--p4);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-block {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 2rem 2rem 1.5rem;
+      border-bottom: 1.5px solid var(--p5);
+    }
+
+    .stat-block:last-child { border-bottom: none; }
+
+    .stat-n {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 3.8rem;
+      line-height: 1;
+      color: var(--p0);
+      letter-spacing: -0.03em;
+    }
+
+    .stat-n sup {
+      font-size: 1.4rem;
+      vertical-align: super;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--p2);
+      margin-top: 0.3rem;
+    }
+
+    /* ─── TICKER ─── */
+    .ticker-wrap {
+      overflow: hidden;
+      background: var(--ink);
+      border-bottom: 1.5px solid var(--ink);
+      padding: 0.7rem 0;
+      white-space: nowrap;
+    }
+
+    .ticker-inner {
+      display: inline-flex;
+      animation: ticker 22s linear infinite;
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--p0);
+      padding-right: 2.5rem;
+    }
+
+    .ticker-item .dot {
+      width: 5px;
+      height: 5px;
+      background: var(--p4);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── MANIFEST ─── */
+    .manifest {
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 5rem 3rem;
+    }
+
+    .manifest-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      border-bottom: 1.5px solid var(--ink);
+      padding-bottom: 0.8rem;
+    }
+
+    .manifest-title {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+
+    .manifest-count {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      color: var(--p3);
+      text-transform: uppercase;
+    }
+
+    .manifest-row {
+      display: grid;
+      grid-template-columns: 3.5rem 1fr 2fr auto;
+      align-items: baseline;
+      gap: 2rem;
+      padding: 1.6rem 0;
+      border-bottom: 1px solid var(--p2);
+      cursor: default;
+    }
+
+    .manifest-row:hover .manifest-row-title { color: var(--p4); }
+    .manifest-row:hover .manifest-num { color: var(--p4); }
+
+    .manifest-num {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 2rem;
+      color: var(--p2);
+      letter-spacing: -0.02em;
+      transition: color 0.12s;
+      line-height: 1;
+    }
+
+    .manifest-row-title {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--ink);
+      transition: color 0.12s;
+      line-height: 1;
+    }
+
+    .manifest-row-desc {
+      font-size: 0.8rem;
+      line-height: 1.7;
+      color: var(--p6);
+    }
+
+    .manifest-tag {
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--p4);
+      white-space: nowrap;
+      border: 1px solid var(--p3);
+      padding: 0.2rem 0.6rem;
+    }
+
+    /* ─── CTA STRIP ─── */
+    .cta-strip {
+      background: var(--p4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3rem;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .cta-strip-text {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: var(--p0);
+    }
+
+    .cta-strip-text span { color: var(--ink); }
+
+    .btn-strip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--p4);
+      background: var(--p0);
+      padding: 0.9rem 2.2rem;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-strip:hover { background: var(--ink); color: var(--p0); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1.5px solid var(--ink);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .footer-cell {
+      padding: 2rem 2.5rem;
+      border-right: 1.5px solid var(--ink);
+    }
+
+    .footer-cell:last-child { border-right: none; }
+
+    .footer-cell-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--p3);
+      margin-bottom: 0.8rem;
+    }
+
+    .footer-brand {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-weight: 900;
+      font-size: 1.8rem;
+      color: var(--ink);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .footer-brand span { color: var(--p4); }
+
+    .footer-tagline {
+      font-size: 0.73rem;
+      color: var(--p5);
+      margin-top: 0.5rem;
+      line-height: 1.6;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .footer-links a {
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: var(--ink);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.12s;
+    }
+
+    .footer-links a::before {
+      content: '';
+      width: 16px;
+      height: 1.5px;
+      background: var(--p3);
+      transition: background 0.12s, width 0.12s;
+    }
+
+    .footer-links a:hover { color: var(--p4); }
+    .footer-links a:hover::before { background: var(--p4); width: 24px; }
+
+    .footer-meta {
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--p3);
+      line-height: 1.8;
+    }
+
+    .footer-bottom {
+      grid-column: 1 / -1;
+      border-top: 1.5px solid var(--ink);
+      padding: 0.9rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .footer-bottom span {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--p3);
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .nav-center, .nav-right { display: none; }
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-left { border-right: none; border-bottom: 1.5px solid var(--ink); padding: 2.5rem 1.5rem; }
+      .hero-right { display: grid; grid-template-columns: 1fr 1fr; }
+      .stat-block { border-right: 1.5px solid var(--p5); border-bottom: none; padding: 1.5rem; }
+      .manifest { padding: 3rem 1.5rem; }
+      .manifest-row { grid-template-columns: 2.5rem 1fr; gap: 1rem; }
+      .manifest-row-desc, .manifest-tag { display: none; }
+      .cta-strip { padding: 2rem 1.5rem; }
+      footer { grid-template-columns: 1fr; }
+      .footer-cell { border-right: none; border-bottom: 1.5px solid var(--ink); }
+      .footer-cell:last-child { border-bottom: none; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- ── Navbar ── -->
+<!-- ── NAV ── -->
 <nav>
-  <a class="nav-brand" href="/">
+  <a class="nav-logo" href="/">
     <img src="/logo.png" alt="RentAByte" />
   </a>
-  <span class="nav-badge">Polygon Amoy Testnet</span>
+  <div class="nav-right">
+    <a class="nav-link" href="https://github.com/abhirajadhikary06/rentabyte" target="_blank" rel="noopener">GitHub</a>
+    <a class="nav-link" href="https://polygon.technology/" target="_blank" rel="noopener">Polygon</a>
+    <a class="nav-link cta" href="/index.html">Launch App</a>
+  </div>
 </nav>
 
-<!-- ── Hero ── -->
+<!-- ── HERO ── -->
 <section class="hero">
-  <div class="hero-eyebrow">
-    <span></span>
-    Decentralised Storage Marketplace
+  <div class="hero-left">
+    <div class="hero-tag">Decentralised Storage Marketplace</div>
+
+    <div class="hero-headline-wrap">
+      <h1>
+        Rent<br>
+        Storage.<br>
+        <span class="accent">Earn on<br>Polygon.</span>
+      </h1>
+      <p class="hero-sub">
+        Turn unused cloud storage into income. Secure, decentralized rentals backed by smart contracts on Polygon.
+      </p>
+    </div>
+
+    <div class="hero-actions">
+      <a class="btn-launch" href="/index.html">
+        Launch App
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <a class="btn-gh" href="https://github.com/abhirajadhikary06/rentabyte" target="_blank" rel="noopener">
+        <img src="./github.png" alt="GitHub" />
+        View on GitHub
+      </a>
+    </div>
   </div>
 
-  <h1>
-    Rent storage.<br/>
-    <span class="gradient-text">Earn on Polygon.</span>
-  </h1>
+  <div class="hero-right">
+    <div class="stat-block">
+      <div class="stat-n">100<sup>%</sup></div>
+      <div class="stat-label">On-chain settlement</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-n">0<sup>ms</sup></div>
+      <div class="stat-label">Trusted intermediaries</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-n">E2E</div>
+      <div class="stat-label">Client-side encryption</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-n">MATIC</div>
+      <div class="stat-label">Native payment token</div>
+    </div>
+  </div>
+</section>
 
-  <p class="hero-sub">
-    Turn unused cloud storage into income while offering secure, decentralized storage rentals powered by blockchain.
-  </p>
+<!-- ── TICKER ── -->
+<div class="ticker-wrap" aria-hidden="true">
+  <div class="ticker-inner">
+    <span class="ticker-item"><span class="dot"></span>Rent Storage</span>
+    <span class="ticker-item"><span class="dot"></span>Earn on Polygon</span>
+    <span class="ticker-item"><span class="dot"></span>Decentralised</span>
+    <span class="ticker-item"><span class="dot"></span>On-chain Contracts</span>
+    <span class="ticker-item"><span class="dot"></span>Pay per Byte</span>
+    <span class="ticker-item"><span class="dot"></span>Zero Custody</span>
+    <span class="ticker-item"><span class="dot"></span>Open Protocol</span>
+    <span class="ticker-item"><span class="dot"></span>Rent Storage</span>
+    <span class="ticker-item"><span class="dot"></span>Earn on Polygon</span>
+    <span class="ticker-item"><span class="dot"></span>Decentralised</span>
+    <span class="ticker-item"><span class="dot"></span>On-chain Contracts</span>
+    <span class="ticker-item"><span class="dot"></span>Pay per Byte</span>
+    <span class="ticker-item"><span class="dot"></span>Zero Custody</span>
+    <span class="ticker-item"><span class="dot"></span>Open Protocol</span>
+  </div>
+</div>
 
-  <div class="cta-group">
-    <a class="btn-primary" href="/index.html">
-      Launch App
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M3 8h10M9 4l4 4-4 4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </a>
-    <a class="btn-secondary" href="https://github.com/abhirajadhikary06/rentabyte" target="_blank" rel="noopener">
-      <img src="./github.png" alt="GitHub" width="16" height="16" />
-      View on GitHub
-    </a>
+<!-- ── MANIFEST ── -->
+<section class="manifest">
+  <div class="manifest-header">
+    <span class="manifest-title">Platform Features</span>
+    <span class="manifest-count">06 modules</span>
   </div>
 
-<!-- ── Footer ── -->
+  <div class="manifest-row">
+    <div class="manifest-num">01</div>
+    <div class="manifest-row-title">Decentralised Storage</div>
+    <div class="manifest-row-desc">Data distributed across independent provider nodes. No single point of failure, no central authority.</div>
+    <div class="manifest-tag">Core</div>
+  </div>
+  <div class="manifest-row">
+    <div class="manifest-num">02</div>
+    <div class="manifest-row-title">Smart Contracts</div>
+    <div class="manifest-row-desc">Every rental enforced on-chain. Payments, disputes, and durations are fully trustless.</div>
+    <div class="manifest-tag">Blockchain</div>
+  </div>
+  <div class="manifest-row">
+    <div class="manifest-num">03</div>
+    <div class="manifest-row-title">Real-time Earnings</div>
+    <div class="manifest-row-desc">Providers receive MATIC micro-payments continuously as storage is actively consumed.</div>
+    <div class="manifest-tag">Payments</div>
+  </div>
+  <div class="manifest-row">
+    <div class="manifest-num">04</div>
+    <div class="manifest-row-title">E2E Encryption</div>
+    <div class="manifest-row-desc">Files encrypted client-side before upload. Providers store only ciphertext they cannot read.</div>
+    <div class="manifest-tag">Security</div>
+  </div>
+  <div class="manifest-row">
+    <div class="manifest-num">05</div>
+    <div class="manifest-row-title">Usage Metering</div>
+    <div class="manifest-row-desc">Byte-level accounting gives renters full cost visibility and eliminates billing surprises.</div>
+    <div class="manifest-tag">Billing</div>
+  </div>
+  <div class="manifest-row">
+    <div class="manifest-num">06</div>
+    <div class="manifest-row-title">Open Protocol</div>
+    <div class="manifest-row-desc">Fully auditable contracts, open-source code. No vendor lock-in, no hidden dependencies.</div>
+    <div class="manifest-tag">Protocol</div>
+  </div>
+</section>
+
+<!-- ── CTA STRIP ── -->
+<div class="cta-strip">
+  <div class="cta-strip-text">
+    Start renting.<br><span>Ship today.</span>
+  </div>
+  <a class="btn-strip" href="/index.html">
+    Launch App
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+</div>
+
+<!-- ── FOOTER ── -->
 <footer>
-  Built on <a href="https://polygon.technology/" target="_blank" rel="noopener">Polygon Amoy</a> &middot;
-  <a href="https://github.com/abhirajadhikary06/rentabyte" target="_blank" rel="noopener">GitHub</a>
+  <div class="footer-cell">
+    <div class="footer-cell-label">Project</div>
+    <div class="footer-brand">Rent<span>A</span>Byte</div>
+    <p class="footer-tagline">Decentralised storage marketplace<br>on Polygon Amoy Testnet.</p>
+  </div>
+  <div class="footer-cell">
+    <div class="footer-cell-label">Links</div>
+    <nav class="footer-links">
+      <a href="/index.html">Launch App</a>
+      <a href="https://github.com/abhirajadhikary06/rentabyte" target="_blank" rel="noopener">GitHub Repository</a>
+      <a href="https://polygon.technology/" target="_blank" rel="noopener">Polygon Network</a>
+    </nav>
+  </div>
+  <div class="footer-cell">
+    <div class="footer-cell-label">Build Info</div>
+    <div class="footer-meta">
+      Network: Polygon Amoy<br>
+      Version: 0.1.0-testnet<br>
+      License: Open Source<br>
+      Status: Live on Testnet
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>RentAByte &mdash; Decentralised Storage on Polygon</span>
+    <span>Built with Solidity + IPFS + Polygon</span>
+  </div>
 </footer>
 
 </body>
